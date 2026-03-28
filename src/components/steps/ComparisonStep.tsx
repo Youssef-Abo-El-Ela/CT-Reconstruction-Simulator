@@ -184,9 +184,9 @@ export function ComparisonStep() {
                 {ALGO_NAMES[method]}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <MetricCard label="RMSE" value={m.rmse} />
-                <MetricCard label="PSNR" value={m.psnr} unit="dB" />
-                <MetricCard label="SSIM" value={m.ssim} />
+                <MetricCard label="RMSE" value={m.rmse.toFixed(1)} />
+                <MetricCard label="PSNR" value={m.psnr.toFixed(1)} unit="dB" />
+                <MetricCard label="SSIM" value={m.ssim.toFixed(1)} />
                 <MetricCard
                   label="Time"
                   value={`${m.timeMs.toFixed(0)}`}
@@ -249,7 +249,7 @@ export function ComparisonStep() {
       )}
 
       {/* Metrics table */}
-      <div className="glass-panel overflow-hidden">
+      <div className="glass-panel overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border/30">
