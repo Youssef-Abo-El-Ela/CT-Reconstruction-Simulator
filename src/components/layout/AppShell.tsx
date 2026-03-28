@@ -1,19 +1,23 @@
-import { useState } from 'react';
-import { StepperNav } from './StepperNav';
-import { useCTStore } from '@/store/ctStore';
-import { ColorMapSelector } from '@/components/shared/ColorMapSelector';
-import { Button } from '@/components/ui/button';
-import { RotateCcw, PanelLeftClose, PanelLeft, SquareActivity } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { StepperNav } from "./StepperNav";
+import { useCTStore } from "@/store/ctStore";
+import { ColorMapSelector } from "@/components/shared/ColorMapSelector";
+import { Button } from "@/components/ui/button";
+import {
+  RotateCcw,
+  PanelLeftClose,
+  PanelLeft,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import type { AnimationSpeed } from '@/types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXRay } from '@fortawesome/free-solid-svg-icons';
+} from "@/components/ui/select";
+import type { AnimationSpeed } from "@/types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXRay } from "@fortawesome/free-solid-svg-icons";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -21,15 +25,39 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { colormap, setColormap, animationSpeed, setAnimationSpeed, resetAll } = useCTStore();
+  const [isMobile, setIsMobile] = useState(false);
+  const { colormap, setColormap, animationSpeed, setAnimationSpeed, resetAll } =
+    useCTStore();
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      {/* Backdrop overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-0'
-        } transition-all duration-300 border-r border-border/50 bg-card/30 backdrop-blur-xl shrink-0 overflow-hidden`}
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed md:relative md:translate-x-0 left-0 top-0 h-screen w-64 transition-all duration-300 border-r border-border/50 bg-card/30 backdrop-blur-xl shrink-0 overflow-hidden z-40 md:z-auto`}
       >
         <div className="w-64 h-full flex flex-col">
           <div className="p-4 border-b border-border/30">
@@ -38,8 +66,12 @@ export function AppShell({ children }: AppShellProps) {
                 <FontAwesomeIcon icon={faXRay} />
               </div>
               <div>
-                <h1 className="text-sm font-bold tracking-tight">CT Simulator</h1>
-                <p className="text-[10px] text-muted-foreground">Image Reconstruction</p>
+                <h1 className="text-sm font-bold tracking-tight">
+                  CT Simulator
+                </h1>
+                <p className="text-[10px] text-muted-foreground">
+                  Image Reconstruction
+                </p>
               </div>
             </div>
           </div>
@@ -48,12 +80,19 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           <div className="p-3 border-t border-border/30 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground uppercase">Colormap</span>
+              <span className="text-[10px] text-muted-foreground uppercase">
+                Colormap
+              </span>
               <ColorMapSelector value={colormap} onChange={setColormap} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground uppercase">Speed</span>
-              <Select value={animationSpeed} onValueChange={(v) => setAnimationSpeed(v as AnimationSpeed)}>
+              <span className="text-[10px] text-muted-foreground uppercase">
+                Speed
+              </span>
+              <Select
+                value={animationSpeed}
+                onValueChange={(v) => setAnimationSpeed(v as AnimationSpeed)}
+              >
                 <SelectTrigger className="w-25 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -70,7 +109,7 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full">
         {/* Top bar */}
         <header className="h-12 border-b border-border/30 flex items-center px-4 gap-3 bg-card/20 backdrop-blur-md shrink-0">
           <Button
@@ -79,19 +118,26 @@ export function AppShell({ children }: AppShellProps) {
             className="h-8 w-8"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+            {sidebarOpen ? (
+              <PanelLeftClose className="h-4 w-4" />
+            ) : (
+              <PanelLeft className="h-4 w-4" />
+            )}
           </Button>
           <div className="flex-1" />
-          <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5" onClick={resetAll}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs gap-1.5"
+            onClick={resetAll}
+          >
             <RotateCcw className="h-3.5 w-3.5" />
             Reset All
           </Button>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6 grid-bg">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6 grid-bg">{children}</main>
       </div>
     </div>
   );
