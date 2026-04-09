@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -61,24 +61,47 @@
   --animate-scan-line: scan-line 3s linear infinite;
 
   @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
   }
   @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
   }
   @keyframes fade-in {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes pulse-glow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
   @keyframes scan-line {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }
 
@@ -92,7 +115,7 @@
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 
 @layer base {
   :root {
@@ -151,11 +174,11 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
   }
 
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
   }
 }
 
@@ -169,7 +192,9 @@
   }
 
   .glow-primary {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.15), 0 0 60px hsl(var(--primary) / 0.05);
+    box-shadow:
+      0 0 20px hsl(var(--primary) / 0.15),
+      0 0 60px hsl(var(--primary) / 0.05);
   }
 
   .glow-sm {
@@ -177,26 +202,54 @@
   }
 
   .grid-bg {
-    background-image: 
+    background-image:
       linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
-  .algo-bp { color: hsl(var(--algo-bp)); }
-  .algo-fbp { color: hsl(var(--algo-fbp)); }
-  .algo-fourier { color: hsl(var(--algo-fourier)); }
-  .algo-art { color: hsl(var(--algo-art)); }
-  .algo-tv { color: hsl(var(--algo-tv)); }
+  .algo-bp {
+    color: hsl(var(--algo-bp));
+  }
+  .algo-fbp {
+    color: hsl(var(--algo-fbp));
+  }
+  .algo-fourier {
+    color: hsl(var(--algo-fourier));
+  }
+  .algo-art {
+    color: hsl(var(--algo-art));
+  }
+  .algo-tv {
+    color: hsl(var(--algo-tv));
+  }
 
-  .bg-algo-bp { background-color: hsl(var(--algo-bp)); }
-  .bg-algo-fbp { background-color: hsl(var(--algo-fbp)); }
-  .bg-algo-fourier { background-color: hsl(var(--algo-fourier)); }
-  .bg-algo-art { background-color: hsl(var(--algo-art)); }
-  .bg-algo-tv { background-color: hsl(var(--algo-tv)); }
+  .bg-algo-bp {
+    background-color: hsl(var(--algo-bp));
+  }
+  .bg-algo-fbp {
+    background-color: hsl(var(--algo-fbp));
+  }
+  .bg-algo-fourier {
+    background-color: hsl(var(--algo-fourier));
+  }
+  .bg-algo-art {
+    background-color: hsl(var(--algo-art));
+  }
+  .bg-algo-tv {
+    background-color: hsl(var(--algo-tv));
+  }
 
-  .border-algo-bp { border-color: hsl(var(--algo-bp)); }
-  .border-algo-fbp { border-color: hsl(var(--algo-fbp)); }
-  .border-algo-fourier { border-color: hsl(var(--algo-fourier)); }
-  .border-algo-art { border-color: hsl(var(--algo-art)); }
+  .border-algo-bp {
+    border-color: hsl(var(--algo-bp));
+  }
+  .border-algo-fbp {
+    border-color: hsl(var(--algo-fbp));
+  }
+  .border-algo-fourier {
+    border-color: hsl(var(--algo-fourier));
+  }
+  .border-algo-art {
+    border-color: hsl(var(--algo-art));
+  }
 }
