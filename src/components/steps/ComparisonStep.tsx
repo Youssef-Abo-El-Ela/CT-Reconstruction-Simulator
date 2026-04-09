@@ -147,58 +147,55 @@ export function ComparisonStep() {
         </p>
       </div>
 
-      {/* Grid of reconstructions */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {/* Original */}
-        <CanvasViewer
-          data={phantomData}
-          width={phantomSize}
-          height={phantomSize}
-          label="Original Phantom"
-          showControls={false}
-        />
-        {methods.map((method) => (
+        <div className="flex flex-col">
           <CanvasViewer
-            key={method}
-            data={reconstructions[method]?.data ?? null}
+            data={phantomData}
             width={phantomSize}
             height={phantomSize}
-            label={`${ALGO_NAMES[method]} (${reconstructions[method]?.timeMs.toFixed(0)}ms)`}
-            borderColor={ALGO_COLORS[method]}
+            label="Original Phantom"
             showControls={false}
           />
-        ))}
-      </div>
+        </div>
 
-      {/* Metrics cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {methods.map((method) => {
           const m = metricsData[method];
-          if (!m) return null;
           return (
-            <div key={method} className="space-y-2">
-              <div
-                className="text-xs font-bold text-center"
-                style={{ color: ALGO_COLORS[method] }}
-              >
-                {ALGO_NAMES[method]}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <MetricCard label="RMSE" value={m.rmse.toFixed(1)} />
-                <MetricCard label="PSNR" value={m.psnr.toFixed(1)} unit="dB" />
-                <MetricCard label="SSIM" value={m.ssim.toFixed(1)} />
-                <MetricCard
-                  label="Time"
-                  value={`${m.timeMs.toFixed(0)}`}
-                  unit="ms"
-                />
-              </div>
+            <div key={method} className="flex flex-col gap-2">
+              <CanvasViewer
+                data={reconstructions[method]?.data ?? null}
+                width={phantomSize}
+                height={phantomSize}
+                label={`${ALGO_NAMES[method]}`}
+                borderColor={ALGO_COLORS[method]}
+                showControls={false}
+              />
+
+              {m && (
+                <div className="space-y-2">
+                  <div
+                    className="text-xs font-bold text-center"
+                    style={{ color: ALGO_COLORS[method] }}
+                  >
+                    {ALGO_NAMES[method]}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <MetricCard label="RMSE" value={m.rmse.toFixed(1)} />
+                    <MetricCard label="PSNR" value={m.psnr.toFixed(1)} unit="dB" />
+                    <MetricCard label="SSIM" value={m.ssim.toFixed(1)} />
+                    <MetricCard
+                      label="Time"
+                      value={`${m.timeMs.toFixed(0)}`}
+                      unit="ms"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Bar chart */}
       {methods.length > 1 && (
         <div className="glass-panel p-4">
           <h3 className="text-sm font-medium mb-4">
@@ -248,7 +245,6 @@ export function ComparisonStep() {
         </div>
       )}
 
-      {/* Metrics table */}
       <div className="glass-panel overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
