@@ -20,12 +20,10 @@ export function radonTransform(
       const s = (di - detHalf + 0.5) * scale;
       let sum = 0;
 
-      // Integrate along the ray perpendicular to detector
       for (let t = -cx; t < cx; t += 0.5) {
         const x = s * cosT - t * sinT + cx;
         const y = s * sinT + t * cosT + cy;
 
-        // Bilinear interpolation
         const x0 = Math.floor(x), y0 = Math.floor(y);
         if (x0 >= 0 && x0 < size - 1 && y0 >= 0 && y0 < size - 1) {
           const fx = x - x0, fy = y - y0;
@@ -57,7 +55,6 @@ export function addGaussianNoise(data: Float32Array, snrDb: number): void {
   const noiseStd = Math.sqrt(noisePower);
 
   for (let i = 0; i < data.length; i++) {
-    // Box-Muller transform
     const u1 = Math.random(), u2 = Math.random();
     const z = Math.sqrt(-2 * Math.log(u1 + 1e-10)) * Math.cos(2 * Math.PI * u2);
     data[i] += z * noiseStd;

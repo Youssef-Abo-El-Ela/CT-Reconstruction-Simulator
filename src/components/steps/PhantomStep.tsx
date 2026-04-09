@@ -176,7 +176,7 @@ export function PhantomStep() {
           <Collapsible>
             <CollapsibleTrigger className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors">
               <Info className="h-4 w-4" />
-              <span>Educational: What is a phantom?</span>
+              <span>What is a phantom?</span>
               <ChevronDown className="h-3.5 w-3.5" />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3">

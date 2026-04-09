@@ -82,10 +82,6 @@
   }
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these base styles back to match the previous v3 behavior.
-*/
 @layer base {
   *,
   ::after,
@@ -139,14 +135,12 @@
     --sidebar-border: 222 20% 14%;
     --sidebar-ring: 187 94% 43%;
 
-    /* Algorithm accent colors */
     --algo-bp: 38 92% 50%;
     --algo-fbp: 187 94% 43%;
     --algo-fourier: 263 70% 58%;
     --algo-art: 152 69% 43%;
     --algo-tv: 330 70% 55%;
 
-    /* Glass effect */
     --glass-bg: 222 40% 10%;
     --glass-border: 222 20% 22%;
   }

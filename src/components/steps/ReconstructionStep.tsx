@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { useCTStore } from '@/store/ctStore';
 import { CanvasViewer } from '@/components/shared/CanvasViewer';
-import { AnimatedReconstructionViewer } from '@/components/shared/AnimatedReconstructionViewer';
+import { AnimatedReconstructionViewer, type AnimatedReconViewerRef } from '@/components/shared/AnimatedReconstructionViewer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
@@ -31,6 +31,29 @@ export function ReconstructionStep() {
 
   const [activeTab, setActiveTab] = useState<ReconMethod>('bp');
   const [isRunning, setIsRunning] = useState<Record<string, boolean>>({});
+
+  const bpViewerRef = useRef<AnimatedReconViewerRef>(null);
+  const fbpViewerRef = useRef<AnimatedReconViewerRef>(null);
+
+  // For BP/FBP: compute immediately (so store is populated) then play animation
+  const runAnimated = useCallback(async (method: 'bp' | 'fbp') => {
+    if (!sinogramData) return;
+    setIsRunning(prev => ({ ...prev, [method]: true }));
+    await new Promise(r => setTimeout(r, 50));
+    const start = performance.now();
+    const data = method === 'bp'
+      ? simpleBackProjection(sinogramData, numAngles, numDetectors, phantomSize)
+      : filteredBackProjection(sinogramData, numAngles, numDetectors, phantomSize, filterType);
+    const timeMs = performance.now() - start;
+    setReconstruction(method, { data, size: phantomSize, timeMs, method });
+    setStepStatus(3, 'done');
+    setStepStatus(4, 'ready');
+    setIsRunning(prev => ({ ...prev, [method]: false }));
+    // Play animation separately (visual only)
+    if (method === 'bp') bpViewerRef.current?.play();
+    else fbpViewerRef.current?.play();
+  }, [sinogramData, numAngles, numDetectors, phantomSize, filterType,
+      setReconstruction, setStepStatus]);
 
   const runReconstruction = useCallback(async (method: ReconMethod) => {
     if (!sinogramData) return;
@@ -123,7 +146,7 @@ export function ReconstructionStep() {
                 Results in a blurry reconstruction without filtering.</p>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => runReconstruction('bp')} disabled={isRunning.bp || !sinogramData} className="gap-1.5">
+                <Button onClick={() => runAnimated('bp')} disabled={isRunning.bp || !sinogramData} className="gap-1.5">
                   <Play className="h-4 w-4" /> {isRunning.bp ? 'Running...' : 'Run BP'}
                 </Button>
                 <Button variant="ghost" onClick={() => resetMethod('bp')} className="gap-1.5">
@@ -132,11 +155,12 @@ export function ReconstructionStep() {
               </div>
               {reconstructions.bp && (
                 <Badge className={`${algoStyles.bp.badge} text-primary-foreground font-mono`}>
-                  {reconstructions.bp.timeMs.toFixed(0)} ms
+                  {reconstructions.bp.timeMs > 0 ? `${reconstructions.bp.timeMs.toFixed(0)} ms` : 'Generated'}
                 </Badge>
               )}
             </div>
             <AnimatedReconstructionViewer
+              ref={bpViewerRef}
               sinogram={sinogramData}
               numAngles={numAngles}
               numDetectors={numDetectors}
@@ -175,7 +199,7 @@ export function ReconstructionStep() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => runReconstruction('fbp')} disabled={isRunning.fbp || !sinogramData} className="gap-1.5">
+                <Button onClick={() => runAnimated('fbp')} disabled={isRunning.fbp || !sinogramData} className="gap-1.5">
                   <Play className="h-4 w-4" /> {isRunning.fbp ? 'Running...' : 'Run FBP'}
                 </Button>
                 <Button variant="ghost" onClick={() => resetMethod('fbp')} className="gap-1.5">
@@ -184,11 +208,12 @@ export function ReconstructionStep() {
               </div>
               {reconstructions.fbp && (
                 <Badge className={`${algoStyles.fbp.badge} text-primary-foreground font-mono`}>
-                  {reconstructions.fbp.timeMs.toFixed(0)} ms
+                  {reconstructions.fbp.timeMs > 0 ? `${reconstructions.fbp.timeMs.toFixed(0)} ms` : 'Generated'}
                 </Badge>
               )}
             </div>
             <AnimatedReconstructionViewer
+              ref={fbpViewerRef}
               sinogram={sinogramData}
               numAngles={numAngles}
               numDetectors={numDetectors}

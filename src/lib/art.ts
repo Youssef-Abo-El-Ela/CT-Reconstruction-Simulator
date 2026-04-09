@@ -17,13 +17,11 @@ export function artReconstruction(
       const cosT = Math.cos(theta);
       const sinT = Math.sin(theta);
 
-      // For each detector, compute forward projection and update
       for (let di = 0; di < numDetectors; di++) {
         const measured = sinogram[ai * numDetectors + di];
         let projected = 0;
         let rayLen = 0;
 
-        // Collect ray pixels
         const rayPixels: { idx: number; weight: number }[] = [];
 
         const s = (di - detHalf + 0.5) / scale;

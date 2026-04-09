@@ -27,7 +27,7 @@ const statusLabels: Record<StepStatus, string> = {
   done: 'Done',
 };
 
-export function StepperNav() {
+export function StepperNav({setSidebarOpen, isMobile}: {setSidebarOpen: (open: boolean) => void, isMobile: boolean}) {
   const { activeStep, setActiveStep, stepStatus } = useCTStore();
 
   return (
@@ -43,7 +43,7 @@ export function StepperNav() {
         return (
           <div key={idx}>
             <button
-              onClick={() => isClickable && setActiveStep(idx)}
+              onClick={() => isClickable && (setActiveStep(idx), isMobile && setSidebarOpen(false))}
               disabled={!isClickable}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
                 isActive

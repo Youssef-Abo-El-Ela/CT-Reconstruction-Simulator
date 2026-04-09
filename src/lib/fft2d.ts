@@ -1,5 +1,4 @@
 export function fft1d(real: Float32Array, imag: Float32Array, n: number, inverse: boolean = false): void {
-  // Bit reversal
   let j = 0;
   for (let i = 0; i < n - 1; i++) {
     if (i < j) {
@@ -11,7 +10,6 @@ export function fft1d(real: Float32Array, imag: Float32Array, n: number, inverse
     j += k;
   }
 
-  // Cooley-Tukey
   const dir = inverse ? -1 : 1;
   for (let len = 2; len <= n; len <<= 1) {
     const halfLen = len >> 1;
@@ -45,7 +43,6 @@ export function fft2d(real: Float32Array, imag: Float32Array, size: number, inve
   const rowR = new Float32Array(size);
   const rowI = new Float32Array(size);
 
-  // Row-wise FFT
   for (let j = 0; j < size; j++) {
     for (let i = 0; i < size; i++) {
       rowR[i] = real[j * size + i];
@@ -58,7 +55,6 @@ export function fft2d(real: Float32Array, imag: Float32Array, size: number, inve
     }
   }
 
-  // Column-wise FFT
   const colR = new Float32Array(size);
   const colI = new Float32Array(size);
   for (let i = 0; i < size; i++) {
@@ -74,7 +70,6 @@ export function fft2d(real: Float32Array, imag: Float32Array, size: number, inve
   }
 }
 
-// Nearest power of 2
 export function nextPow2(n: number): number {
   let p = 1;
   while (p < n) p <<= 1;
@@ -87,7 +82,6 @@ export function fourierReconstruction(
   numDetectors: number,
   outputSize: number
 ): Float32Array {
-  // Fourier Slice Theorem: 1D FFT of each projection → insert into 2D frequency domain → 2D IFFT
   const fftSize = nextPow2(Math.max(numDetectors, outputSize));
   const freqReal = new Float32Array(fftSize * fftSize);
   const freqImag = new Float32Array(fftSize * fftSize);
@@ -99,7 +93,6 @@ export function fourierReconstruction(
     const theta = (ai * Math.PI) / numAngles;
     const cosT = Math.cos(theta), sinT = Math.sin(theta);
 
-    // Get projection and FFT it
     const projR = new Float32Array(fftSize);
     const projI = new Float32Array(fftSize);
     const offset = Math.floor((fftSize - numDetectors) / 2);
@@ -109,7 +102,6 @@ export function fourierReconstruction(
     }
     fft1d(projR, projI, fftSize);
 
-    // Place in 2D frequency domain along the line at angle theta
     for (let i = 0; i < fftSize; i++) {
       const freq = i <= fftSize / 2 ? i : i - fftSize;
       const fx = Math.round(freq * cosT + center);
@@ -123,7 +115,6 @@ export function fourierReconstruction(
     }
   }
 
-  // Average overlapping samples
   for (let i = 0; i < freqReal.length; i++) {
     if (weight[i] > 0) {
       freqReal[i] /= weight[i];
@@ -131,16 +122,10 @@ export function fourierReconstruction(
     }
   }
 
-  // FFT shift (swap quadrants for centered DC)
   fftShift2D(freqReal, freqImag, fftSize);
 
-  // 2D IFFT
   fft2d(freqReal, freqImag, fftSize, true);
-
-  // FFT shift 2D spatial domain so origin is at center
   fftShift2D(freqReal, freqImag, fftSize);
-
-  // Extract output
   const result = new Float32Array(outputSize * outputSize);
   const cropOffset = Math.floor((fftSize - outputSize) / 2);
   for (let j = 0; j < outputSize; j++) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { applyColormap } from '@/lib/colormap';
 import { useCTStore } from '@/store/ctStore';
 import { backProjectionGenerator } from '@/lib/backproject';
@@ -19,7 +19,14 @@ interface AnimatedReconstructionViewerProps {
   onComplete?: (data: Float32Array) => void;
 }
 
-export function AnimatedReconstructionViewer({
+export interface AnimatedReconViewerRef {
+  play: () => void;
+  pause: () => void;
+  reset: () => void;
+  skipToEnd: () => void;
+}
+
+export const AnimatedReconstructionViewer = forwardRef<AnimatedReconViewerRef, AnimatedReconstructionViewerProps>(({
   sinogram,
   numAngles,
   numDetectors,
@@ -29,7 +36,7 @@ export function AnimatedReconstructionViewer({
   borderColor,
   forceData,
   onComplete
-}: AnimatedReconstructionViewerProps) {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globalColormap = useCTStore((s) => s.colormap);
   
@@ -38,20 +45,41 @@ export function AnimatedReconstructionViewer({
   const [speed, setSpeed] = useState(0.1);
   const generatorRef = useRef<ReturnType<typeof backProjectionGenerator> | null>(null);
   const requestRef = useRef<number>();
+  // Use a ref for forceData so changes don't trigger the reset effect and kill an animation
+  const forceDataRef = useRef<Float32Array | null | undefined>(forceData);
+  forceDataRef.current = forceData;
   
   const [currentRecon, setCurrentRecon] = useState<Float32Array | null>(null);
   const [currentAngle, setCurrentAngle] = useState(0);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      // Always start fresh from beginning (ignore forceData for animation)
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      setStep(0);
+      setCurrentRecon(sinogram ? new Float32Array(phantomSize * phantomSize) : null);
+      setCurrentAngle(0);
+      if (sinogram) {
+        generatorRef.current = backProjectionGenerator(sinogram, numAngles, numDetectors, phantomSize, filterType);
+      }
+      setIsPlaying(true);
+    },
+    pause: () => setIsPlaying(false),
+    reset: () => reset(),
+    skipToEnd: () => skipToEnd()
+  }));
   
   const reset = useCallback(() => {
     setIsPlaying(false);
     setStep(0);
-    setCurrentRecon(forceData || (sinogram ? new Float32Array(phantomSize * phantomSize) : null));
+    // Use the ref so forceData changes don't recreate this callback
+    setCurrentRecon(forceDataRef.current || (sinogram ? new Float32Array(phantomSize * phantomSize) : null));
     setCurrentAngle(0);
     if (sinogram) {
       generatorRef.current = backProjectionGenerator(sinogram, numAngles, numDetectors, phantomSize, filterType);
     }
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
-  }, [sinogram, numAngles, numDetectors, phantomSize, filterType, forceData]);
+  }, [sinogram, numAngles, numDetectors, phantomSize, filterType]); // forceData intentionally via ref
 
   useEffect(() => {
     reset();
@@ -80,7 +108,7 @@ export function AnimatedReconstructionViewer({
       setIsPlaying(false);
       setStep(numAngles);
       if (onComplete && result.value) {
-        onComplete(result.value);
+        onComplete(result.value.recon);
       }
     }
   }, [isPlaying, speed, onComplete, numAngles]);
@@ -126,7 +154,7 @@ export function AnimatedReconstructionViewer({
     const imageData = applyColormap(currentRecon, phantomSize, phantomSize, globalColormap);
     ctx.putImageData(imageData, 0, 0);
 
-    if (step > 0 && step < numAngles && !forceData) {
+    if (step > 0 && step < numAngles && isPlaying) {
         ctx.save();
         const cx = phantomSize / 2;
         const cy = phantomSize / 2;
@@ -168,14 +196,27 @@ export function AnimatedReconstructionViewer({
         )}
       </div>
       
-      {sinogram && !forceData && (
+      {sinogram && (
         <div className="flex items-center gap-2 mt-3 p-1">
           <Button 
             variant="ghost" 
             size="icon" 
             className="h-8 w-8" 
-            onClick={() => setIsPlaying(!isPlaying)}
-            disabled={step >= numAngles}
+            onClick={() => {
+              if (step >= numAngles) {
+                // Replay from start
+                if (requestRef.current) cancelAnimationFrame(requestRef.current);
+                setStep(0);
+                setCurrentRecon(sinogram ? new Float32Array(phantomSize * phantomSize) : null);
+                setCurrentAngle(0);
+                if (sinogram) {
+                  generatorRef.current = backProjectionGenerator(sinogram, numAngles, numDetectors, phantomSize, filterType);
+                }
+                setIsPlaying(true);
+              } else {
+                setIsPlaying(!isPlaying);
+              }
+            }}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
@@ -199,4 +240,4 @@ export function AnimatedReconstructionViewer({
       )}
     </div>
   );
-}
+});

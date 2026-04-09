@@ -34,7 +34,6 @@ export function simpleBackProjection(
     }
   }
 
-  // Normalize
   const factor = Math.PI / numAngles;
   for (let i = 0; i < recon.length; i++) recon[i] *= factor;
 
@@ -51,7 +50,6 @@ export function filteredBackProjection(
   const filter = createFilter(numDetectors, filterType);
   const filteredSinogram = new Float32Array(sinogram.length);
 
-  // Filter each projection
   for (let ai = 0; ai < numAngles; ai++) {
     const projection = sinogram.slice(ai * numDetectors, (ai + 1) * numDetectors);
     const filtered = applyFilter1D(projection, filter);
@@ -116,4 +114,11 @@ export function* backProjectionGenerator(
       step: ai
     };
   }
+
+  return {
+    recon: new Float32Array(recon),
+    currentAngle: 180,
+    currentProjection: new Float32Array(),
+    step: numAngles
+  };
 }

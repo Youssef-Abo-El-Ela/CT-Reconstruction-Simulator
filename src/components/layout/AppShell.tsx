@@ -45,7 +45,6 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Backdrop overlay for mobile */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
@@ -53,22 +52,21 @@ export function AppShell({ children }: AppShellProps) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:-ml-64"
         } fixed md:relative md:translate-x-0 left-0 top-0 h-screen w-64 transition-all duration-300 border-r border-border/50 bg-card/30 backdrop-blur-xl shrink-0 overflow-hidden z-40 md:z-auto`}
       >
         <div className="w-64 h-full flex flex-col">
           <div className="p-4 border-b border-border/30">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                <FontAwesomeIcon icon={faXRay} />
+                <p className="text-lg font-bold tracking-tight text-primary">
+                  CT
+                </p>
               </div>
               <div>
-                <h1 className="text-sm font-bold tracking-tight">
-                  CT Simulator
-                </h1>
+                <h1 className="text-sm font-bold tracking-tight">Simulator</h1>
                 <p className="text-[10px] text-muted-foreground">
                   Image Reconstruction
                 </p>
@@ -76,7 +74,7 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <StepperNav />
+            <StepperNav setSidebarOpen={setSidebarOpen} isMobile={isMobile} />
           </div>
           <div className="p-3 border-t border-border/30 space-y-2">
             <div className="flex items-center justify-between">
@@ -108,9 +106,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 w-full">
-        {/* Top bar */}
         <header className="h-12 border-b border-border/30 flex items-center px-4 gap-3 bg-card/20 backdrop-blur-md shrink-0">
           <Button
             variant="ghost"
@@ -136,7 +132,6 @@ export function AppShell({ children }: AppShellProps) {
           </Button>
         </header>
 
-        {/* Content */}
         <main className="flex-1 overflow-y-auto p-6 grid-bg">{children}</main>
       </div>
     </div>

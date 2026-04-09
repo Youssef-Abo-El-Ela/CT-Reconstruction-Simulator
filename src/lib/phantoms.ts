@@ -2,7 +2,6 @@ export function generateSheppLogan(size: number): Float32Array {
   const data = new Float32Array(size * size);
   const cx = size / 2, cy = size / 2;
   
-  // Standard Shepp-Logan ellipse parameters: [density, a, b, x0, y0, phi(deg)]
   const ellipses: [number, number, number, number, number, number][] = [
     [1.0,   0.69,  0.92,   0,      0,      0],
     [-0.8,  0.6624,0.8740,  0,     -0.0184, 0],
@@ -37,7 +36,6 @@ export function generateSheppLogan(size: number): Float32Array {
     }
   }
 
-  // Normalize to 0-1
   let min = Infinity, max = -Infinity;
   for (let i = 0; i < data.length; i++) {
     if (data[i] < min) min = data[i];
@@ -54,16 +52,12 @@ export function generateGeometric(size: number): Float32Array {
   const data = new Float32Array(size * size);
   const cx = size / 2, cy = size / 2;
 
-  // Background
   for (let i = 0; i < data.length; i++) data[i] = 0;
 
-  // Large circle
   fillCircle(data, size, cx, cy, size * 0.4, 0.3);
-  // Medium circles
   fillCircle(data, size, cx - size * 0.15, cy - size * 0.1, size * 0.12, 0.7);
   fillCircle(data, size, cx + size * 0.15, cy + size * 0.1, size * 0.1, 0.5);
   fillCircle(data, size, cx, cy + size * 0.2, size * 0.08, 0.9);
-  // Rectangles
   fillRect(data, size, cx - size * 0.3, cy - size * 0.25, size * 0.12, size * 0.2, 0.6);
   fillRect(data, size, cx + size * 0.1, cy - size * 0.2, size * 0.15, size * 0.1, 0.8);
 
@@ -80,7 +74,6 @@ export function generateResolution(size: number): Float32Array {
       const r = Math.sqrt(dx * dx + dy * dy);
       const maxR = size * 0.45;
       if (r < maxR) {
-        // Concentric rings with decreasing spacing
         const normalR = r / maxR;
         const freq = 2 + 20 * normalR * normalR;
         const val = 0.5 + 0.5 * Math.cos(freq * normalR * Math.PI * 2);

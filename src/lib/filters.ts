@@ -6,7 +6,7 @@ export function createFilter(numDetectors: number, filterType: FilterType): Floa
 
   for (let i = 0; i < n; i++) {
     const omega = (i <= n / 2) ? i / n : (i - n) / n;
-    const absOmega = Math.abs(omega) * 2; // normalized 0 to 1
+    const absOmega = Math.abs(omega) * 2;
 
     switch (filterType) {
       case 'ram-lak':
@@ -32,7 +32,6 @@ export function createFilter(numDetectors: number, filterType: FilterType): Floa
 
 export function applyFilter1D(projection: Float32Array, filter: Float32Array): Float32Array {
   const n = projection.length;
-  // Simple DFT-based filtering
   const realIn = new Float32Array(n);
   const imagIn = new Float32Array(n);
   const realOut = new Float32Array(n);
@@ -40,21 +39,16 @@ export function applyFilter1D(projection: Float32Array, filter: Float32Array): F
 
   for (let i = 0; i < n; i++) realIn[i] = projection[i];
 
-  // Forward DFT
   dft(realIn, imagIn, realOut, imagOut, n, 1);
 
-  // Apply filter
   for (let i = 0; i < n; i++) {
     realOut[i] *= filter[i];
     imagOut[i] *= filter[i];
   }
-
-  // Inverse DFT
   const resultReal = new Float32Array(n);
   const resultImag = new Float32Array(n);
   dft(realOut, imagOut, resultReal, resultImag, n, -1);
 
-  // Scale
   for (let i = 0; i < n; i++) resultReal[i] /= n;
 
   return resultReal;

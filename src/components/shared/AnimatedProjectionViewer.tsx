@@ -43,7 +43,6 @@ export function AnimatedProjectionViewer({
     const cx = totalSize / 2;
     const cy = totalSize / 2;
 
-    // Draw Phantom
     if (phantomData) {
       const phantomCanvas = document.createElement('canvas');
       phantomCanvas.width = phantomSize;

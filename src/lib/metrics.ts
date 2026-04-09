@@ -1,5 +1,3 @@
-// Image quality metrics
-
 export function computeRMSE(recon: Float32Array, reference: Float32Array): number {
   let sum = 0;
   const n = Math.min(recon.length, reference.length);
@@ -21,7 +19,6 @@ export function computePSNR(recon: Float32Array, reference: Float32Array): numbe
 }
 
 export function computeSSIM(recon: Float32Array, reference: Float32Array, size: number): number {
-  // Simplified SSIM using global statistics
   const n = recon.length;
   let muX = 0, muY = 0;
   for (let i = 0; i < n; i++) { muX += recon[i]; muY += reference[i]; }
