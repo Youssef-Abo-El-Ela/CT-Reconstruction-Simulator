@@ -70,8 +70,8 @@ Compare all executed reconstructions side by side with quantitative metrics.
 | **Framework** | [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
 | **Build Tool** | [Vite](https://vitejs.dev/) |
 | **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) |
-| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) (Radix UI primitives) |
-| **Animations** | [Framer Motion](https://www.framer.com/motion/) |
+| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) |
+| **Animations** | [Motion](https://www.framer.com/motion/) |
 | **State Management** | [Zustand](https://zustand-demo.pmnd.rs/) |
 | **Charts** | [Recharts](https://recharts.org/) |
 ---
