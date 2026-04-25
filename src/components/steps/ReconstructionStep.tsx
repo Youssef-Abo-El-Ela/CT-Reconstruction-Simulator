@@ -20,6 +20,7 @@ import { Play, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { FilterType, ReconMethod } from '@/types';
 import { Rotate3D } from 'lucide-react';
+import { sartReconstruction } from '@/lib/sart';
 
 export function ReconstructionStep() {
   const {
@@ -77,6 +78,9 @@ export function ReconstructionStep() {
       case 'art':
         data = artReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda);
         break;
+      case 'sart':
+        data = sartReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda);
+        break;
       default:
         data = new Float32Array(phantomSize * phantomSize);
     }
@@ -102,6 +106,7 @@ export function ReconstructionStep() {
     fbp: { border: 'hsl(187, 94%, 43%)', badge: 'bg-algo-fbp' },
     fourier: { border: 'hsl(263, 70%, 58%)', badge: 'bg-algo-fourier' },
     art: { border: 'hsl(152, 69%, 43%)', badge: 'bg-algo-art' },
+    sart: { border: 'hsl(200, 70%, 50%)', badge: 'bg-algo-sart' },
   };
 
   return (
@@ -134,6 +139,9 @@ export function ReconstructionStep() {
           </TabsTrigger>
           <TabsTrigger value="art" className="text-xs gap-1">
             <span className="w-2 h-2 rounded-full bg-algo-art" /> ART
+          </TabsTrigger>
+          <TabsTrigger value="sart" className="text-xs gap-1">
+            <span className="w-2 h-2 rounded-full bg-algo-sart" /> SART
           </TabsTrigger>
         </TabsList>
 
@@ -311,6 +319,56 @@ export function ReconstructionStep() {
               height={phantomSize}
               label="ART/SART Reconstruction"
               borderColor={algoStyles.art.border}
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="sart" className="mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="glass-panel p-4 space-y-3">
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">Iterations</span>
+                    <span className="font-mono text-primary">{artIterations}</span>
+                  </div>
+                  <Slider
+                    value={[artIterations]}
+                    onValueChange={([v]) => setArtIterations(v)}
+                    min={1} max={50} step={1}
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">Relaxation λ</span>
+                    <span className="font-mono text-primary">{artLambda.toFixed(2)}</span>
+                  </div>
+                  <Slider
+                    value={[artLambda * 100]}
+                    onValueChange={([v]) => setArtLambda(v / 100)}
+                    min={10} max={200} step={5}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={() => runReconstruction('sart')} disabled={isRunning.sart || !sinogramData} className="gap-1.5">
+                  <Play className="h-4 w-4" /> {isRunning.sart ? 'Running...' : 'Run SART'}
+                </Button>
+                <Button variant="ghost" onClick={() => resetMethod('sart')} className="gap-1.5">
+                  <RotateCcw className="h-4 w-4" /> Reset
+                </Button>
+              </div>
+              {reconstructions.sart && (
+                <Badge className={`${algoStyles.sart.badge} text-primary-foreground font-mono`}>
+                  {reconstructions.sart.timeMs.toFixed(0)} ms
+                </Badge>
+              )}
+            </div>
+            <CanvasViewer
+              data={reconstructions.sart?.data ?? null}
+              width={phantomSize}
+              height={phantomSize}
+              label="SART Reconstruction"
+              borderColor={algoStyles.sart.border}
             />
           </div>
         </TabsContent>
