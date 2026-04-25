@@ -107,7 +107,7 @@ export function ProjectionStep() {
                 <Slider
                   value={[numAngles]}
                   onValueChange={([v]) => setNumAngles(v)}
-                  min={18} max={360} step={1}
+                  min={1} max={360} step={1}
                 />
               </div>
 

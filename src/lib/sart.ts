@@ -3,8 +3,8 @@ export function sartReconstruction(
     numAngles: number,
     numDetectors: number,
     outputSize: number,
-    iterations: number = 10,
-    lambda: number = 0.5 // Note: SART often performs best with a lambda between 0.1 and 0.5
+    iterations: number = 40,
+    lambda: number = 0.5
 ): Float32Array {
     const recon = new Float32Array(outputSize * outputSize);
     const cx = outputSize / 2, cy = outputSize / 2;
@@ -46,9 +46,9 @@ export function sartReconstruction(
                     const rayCorrection = (measured - projected) / rayLen;
 
                     // --- SART MODIFICATION 2: Accumulate corrections, DO NOT update recon yet ---
-                    for (const { idx } of rayPixels) {
+                    for (const { idx , weight } of rayPixels) {
                         correctionBuffer[idx] += rayCorrection;
-                        weightBuffer[idx] += 1; // Track how many rays hit this pixel
+                        weightBuffer[idx] += weight * weight; // Track how many rays hit this pixel
                     }
                 }
             }

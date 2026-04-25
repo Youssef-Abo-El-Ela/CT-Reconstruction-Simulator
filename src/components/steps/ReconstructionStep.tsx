@@ -26,7 +26,8 @@ export function ReconstructionStep() {
   const {
     sinogramData, numAngles, numDetectors, phantomSize,
     filterType, setFilterType, artIterations, setArtIterations,
-    artLambda, setArtLambda, setReconstruction, reconstructions,
+    artLambda, setArtLambda, sartIterations, setSartIterations,
+    sartLambda, setSartLambda, setReconstruction, reconstructions,
     setStepStatus,
   } = useCTStore();
 
@@ -79,7 +80,7 @@ export function ReconstructionStep() {
         data = artReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda);
         break;
       case 'sart':
-        data = sartReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda);
+        data = sartReconstruction(sinogramData, numAngles, numDetectors, phantomSize, sartIterations, sartLambda);
         break;
       default:
         data = new Float32Array(phantomSize * phantomSize);
@@ -91,7 +92,7 @@ export function ReconstructionStep() {
     setIsRunning(prev => ({ ...prev, [method]: false }));
     setStepStatus(3, 'done');
     setStepStatus(4, 'ready');
-  }, [sinogramData, numAngles, numDetectors, phantomSize, filterType, artIterations, artLambda,
+  }, [sinogramData, numAngles, numDetectors, phantomSize, filterType, artIterations, artLambda, sartIterations, sartLambda,
       setReconstruction, setStepStatus]);
 
   const resetMethod = useCallback((method: string) => {
@@ -284,7 +285,7 @@ export function ReconstructionStep() {
                   <Slider
                     value={[artIterations]}
                     onValueChange={([v]) => setArtIterations(v)}
-                    min={1} max={50} step={1}
+                    min={1} max={300} step={1}
                   />
                 </div>
                 <div>
@@ -295,7 +296,7 @@ export function ReconstructionStep() {
                   <Slider
                     value={[artLambda * 100]}
                     onValueChange={([v]) => setArtLambda(v / 100)}
-                    min={10} max={200} step={5}
+                    min={10} max={300} step={5}
                   />
                 </div>
               </div>
@@ -317,10 +318,11 @@ export function ReconstructionStep() {
               data={reconstructions.art?.data ?? null}
               width={phantomSize}
               height={phantomSize}
-              label="ART/SART Reconstruction"
+              label="ART Reconstruction"
               borderColor={algoStyles.art.border}
             />
           </div>
+        {/* SART */}
         </TabsContent>
         <TabsContent value="sart" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -329,22 +331,22 @@ export function ReconstructionStep() {
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-muted-foreground">Iterations</span>
-                    <span className="font-mono text-primary">{artIterations}</span>
+                    <span className="font-mono text-primary">{sartIterations}</span>
                   </div>
                   <Slider
-                    value={[artIterations]}
-                    onValueChange={([v]) => setArtIterations(v)}
-                    min={1} max={50} step={1}
+                    value={[sartIterations]}
+                    onValueChange={([v]) => setSartIterations(v)}
+                    min={1} max={200} step={1}
                   />
                 </div>
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-muted-foreground">Relaxation λ</span>
-                    <span className="font-mono text-primary">{artLambda.toFixed(2)}</span>
+                    <span className="font-mono text-primary">{sartLambda.toFixed(2)}</span>
                   </div>
                   <Slider
-                    value={[artLambda * 100]}
-                    onValueChange={([v]) => setArtLambda(v / 100)}
+                    value={[sartLambda * 100]}
+                    onValueChange={([v]) => setSartLambda(v / 100)}
                     min={10} max={200} step={5}
                   />
                 </div>

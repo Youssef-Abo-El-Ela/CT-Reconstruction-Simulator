@@ -44,6 +44,11 @@ interface CTStore {
   artLambda: number;
   setArtLambda: (l: number) => void;
 
+  sartIterations: number;
+  setSartIterations: (n: number) => void;
+  sartLambda: number;
+  setSartLambda: (l: number) => void;
+
   animationSpeed: AnimationSpeed;
   setAnimationSpeed: (s: AnimationSpeed) => void;
   colormap: ColormapName;
@@ -71,6 +76,8 @@ const initialState = {
   filterType: 'ram-lak' as FilterType,
   artIterations: 10,
   artLambda: 0.5,
+  sartIterations: 40,
+  sartLambda: 0.5,
   animationSpeed: 'fast' as AnimationSpeed,
   colormap: 'grayscale' as ColormapName,
 };
@@ -98,6 +105,8 @@ export const useCTStore = create<CTStore>((set) => ({
   setFilterType: (f) => set({ filterType: f }),
   setArtIterations: (n) => set({ artIterations: n }),
   setArtLambda: (l) => set({ artLambda: l }),
+  setSartIterations: (n) => set({ sartIterations: n }),
+  setSartLambda: (l) => set({ sartLambda: l }),
   setAnimationSpeed: (s) => set({ animationSpeed: s }),
   setColormap: (c) => set({ colormap: c }),
   resetAll: () => set(initialState),

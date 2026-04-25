@@ -31,7 +31,7 @@ export const ALGO_NAMES: Record<ReconMethod, string> = {
   bp: 'Back Projection',
   fbp: 'Filtered Back Projection',
   fourier: 'Fourier Method',
-  art: 'ART/SART',
+  art: 'ART',
   sart: 'SART',
 };
 
