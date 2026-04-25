@@ -162,6 +162,7 @@
     --algo-fbp: 187 94% 43%;
     --algo-fourier: 263 70% 58%;
     --algo-art: 152 69% 43%;
+    --algo-sart: 200 70% 50%;
     --algo-tv: 330 70% 55%;
 
     --glass-bg: 222 40% 10%;
@@ -236,6 +237,9 @@
   .bg-algo-art {
     background-color: hsl(var(--algo-art));
   }
+  .bg-algo-sart {
+    background-color: hsl(var(--algo-sart));
+  }
   .bg-algo-tv {
     background-color: hsl(var(--algo-tv));
   }
@@ -251,5 +255,8 @@
   }
   .border-algo-art {
     border-color: hsl(var(--algo-art));
+  }
+  .border-algo-sart {
+    border-color: hsl(var(--algo-sart));
   }
 }

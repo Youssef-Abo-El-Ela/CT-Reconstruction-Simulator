@@ -128,7 +128,7 @@ export function ReconstructionStep() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ReconMethod)}>
-        <TabsList className="grid w-full grid-cols-4 bg-muted/30">
+        <TabsList className="grid w-full grid-cols-5 bg-muted/30">
           <TabsTrigger value="bp" className="text-xs gap-1">
             <span className="w-2 h-2 rounded-full bg-algo-bp" /> BP
           </TabsTrigger>
