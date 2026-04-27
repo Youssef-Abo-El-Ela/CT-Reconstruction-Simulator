@@ -80,7 +80,7 @@ export function ReconstructionStep() {
         data = artReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda, scanAngleRangeDeg, projectionAnglesDeg);
         break;
       case 'sart':
-        data = sartReconstruction(sinogramData, numAngles, numDetectors, phantomSize, sartIterations, sartLambda);
+        data = sartReconstruction(sinogramData, numAngles, numDetectors, phantomSize, sartIterations, sartLambda, scanAngleRangeDeg, projectionAnglesDeg);
         break;
       default:
         data = new Float32Array(phantomSize * phantomSize);
