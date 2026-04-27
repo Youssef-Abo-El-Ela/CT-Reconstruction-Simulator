@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { Waves } from "lucide-react";
 
 export function SinogramStep() {
-  const { sinogramData, numAngles, numDetectors } = useCTStore();
+  const { sinogramData, numAngles, numDetectors, scanAngleRangeDeg } = useCTStore();
 
   return (
     <motion.div

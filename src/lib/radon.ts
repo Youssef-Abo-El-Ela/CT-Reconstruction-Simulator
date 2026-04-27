@@ -5,15 +5,16 @@ export function radonTransform(
   numDetectors: number,
   noiseEnabled: boolean = false,
   noiseSNR: number = 40,
-): Float32Array {
+  angleRangeDeg: number = 180): Float32Array {
   const sinogram = new Float32Array(numAngles * numDetectors);
   const cx = size / 2,
     cy = size / 2;
   const detHalf = numDetectors / 2;
   const scale = size / numDetectors;
+  const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = (ai * Math.PI) / numAngles;
+    const theta = (ai * angleRangeRad) / numAngles;
     const mathTheta = theta + Math.PI / 2;
     const cosT = Math.cos(mathTheta);
     const sinT = Math.sin(mathTheta);

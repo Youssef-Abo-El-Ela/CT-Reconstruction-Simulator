@@ -15,6 +15,8 @@ interface CTStore {
 
   numAngles: number;
   setNumAngles: (n: number) => void;
+  scanAngleRangeDeg: number;
+  setScanAngleRangeDeg: (deg: number) => void;
   numDetectors: number;
   setNumDetectors: (n: number) => void;
   noiseEnabled: boolean;
@@ -24,6 +26,8 @@ interface CTStore {
 
   sinogramData: Float32Array | null;
   setSinogramData: (data: Float32Array) => void;
+  projectionAnglesDeg: Float32Array | null;
+  setProjectionAnglesDeg: (data: Float32Array | null) => void;
   liveSinogramData: Float32Array | null;
   setLiveSinogramData: (data: Float32Array | null) => void;
   currentProjection: Float32Array | null;
@@ -64,10 +68,12 @@ const initialState = {
   phantomData: null as Float32Array | null,
   phantomSize: 256,
   numAngles: 180,
+  scanAngleRangeDeg: 180,
   numDetectors: 256,
   noiseEnabled: false,
   noiseSNR: 40,
   sinogramData: null as Float32Array | null,
+  projectionAnglesDeg: null as Float32Array | null,
   liveSinogramData: null as Float32Array | null,
   currentProjection: null as Float32Array | null,
   scanProgress: 0,
@@ -91,10 +97,12 @@ export const useCTStore = create<CTStore>((set) => ({
   setPhantomType: (type) => set({ phantomType: type }),
   setPhantomData: (data, size) => set({ phantomData: data, phantomSize: size }),
   setNumAngles: (n) => set({ numAngles: n }),
+  setScanAngleRangeDeg: (deg) => set({ scanAngleRangeDeg: deg }),
   setNumDetectors: (n) => set({ numDetectors: n }),
   setNoiseEnabled: (v) => set({ noiseEnabled: v }),
   setNoiseSNR: (v) => set({ noiseSNR: v }),
   setSinogramData: (data) => set({ sinogramData: data }),
+  setProjectionAnglesDeg: (data) => set({ projectionAnglesDeg: data }),
   setLiveSinogramData: (data) => set({ liveSinogramData: data }),
   setCurrentProjection: (data) => set({ currentProjection: data }),
   setScanProgress: (p) => set({ scanProgress: p }),

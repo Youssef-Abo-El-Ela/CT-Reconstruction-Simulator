@@ -101,6 +101,8 @@ export function fourierReconstruction(
   numAngles: number,
   numDetectors: number,
   outputSize: number,
+  angleRangeDeg: number = 180,
+  projectionAnglesDeg?: Float32Array | null
 ): Float32Array {
   const fftSize = nextPow2(Math.max(numDetectors, outputSize));
   const freqReal = new Float32Array(fftSize * fftSize);
@@ -108,12 +110,13 @@ export function fourierReconstruction(
   const weight = new Float32Array(fftSize * fftSize);
 
   const center = fftSize / 2;
+  const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = (ai * Math.PI) / numAngles;
-    const mathTheta = theta + Math.PI / 2;
-    const cosT = Math.cos(mathTheta),
-      sinT = Math.sin(mathTheta);
+    const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
+      ? (projectionAnglesDeg[ai] * Math.PI) / 180
+      : (ai * angleRangeRad) / numAngles;
+    const cosT = Math.cos(theta), sinT = Math.sin(theta);
 
     const projR = new Float32Array(fftSize);
     const projI = new Float32Array(fftSize);

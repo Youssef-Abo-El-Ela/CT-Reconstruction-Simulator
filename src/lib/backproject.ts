@@ -6,18 +6,22 @@ export function simpleBackProjection(
   numAngles: number,
   numDetectors: number,
   outputSize: number,
+  angleRangeDeg: number = 180,
+  projectionAnglesDeg?: Float32Array | null
 ): Float32Array {
   const recon = new Float32Array(outputSize * outputSize);
   const cx = outputSize / 2,
     cy = outputSize / 2;
   const detHalf = numDetectors / 2;
   const scale = numDetectors / outputSize;
+  const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = (ai * Math.PI) / numAngles;
-    const mathTheta = theta + Math.PI / 2;
-    const cosT = Math.cos(mathTheta);
-    const sinT = Math.sin(mathTheta);
+    const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
+      ? (projectionAnglesDeg[ai] * Math.PI) / 180
+      : (ai * angleRangeRad) / numAngles;
+    const cosT = Math.cos(theta);
+    const sinT = Math.sin(theta);
 
     for (let j = 0; j < outputSize; j++) {
       for (let i = 0; i < outputSize; i++) {
@@ -37,7 +41,7 @@ export function simpleBackProjection(
     }
   }
 
-  const factor = Math.PI / numAngles;
+  const factor = angleRangeRad / numAngles;
   for (let i = 0; i < recon.length; i++) recon[i] *= factor;
 
   return recon;
@@ -48,7 +52,9 @@ export function filteredBackProjection(
   numAngles: number,
   numDetectors: number,
   outputSize: number,
-  filterType: FilterType = "ram-lak",
+  filterType: FilterType = 'ram-lak',
+  angleRangeDeg: number = 180,
+  projectionAnglesDeg?: Float32Array | null
 ): Float32Array {
   const filter = createFilter(numDetectors, filterType);
   const filteredSinogram = new Float32Array(sinogram.length);
@@ -62,12 +68,7 @@ export function filteredBackProjection(
     filteredSinogram.set(filtered, ai * numDetectors);
   }
 
-  return simpleBackProjection(
-    filteredSinogram,
-    numAngles,
-    numDetectors,
-    outputSize,
-  );
+  return simpleBackProjection(filteredSinogram, numAngles, numDetectors, outputSize, angleRangeDeg, projectionAnglesDeg);
 }
 
 export function* backProjectionGenerator(
@@ -76,12 +77,9 @@ export function* backProjectionGenerator(
   numDetectors: number,
   outputSize: number,
   filterType?: FilterType,
-): Generator<{
-  recon: Float32Array;
-  currentAngle: number;
-  currentProjection: Float32Array;
-  step: number;
-}> {
+  angleRangeDeg: number = 180,
+  projectionAnglesDeg?: Float32Array | null
+): Generator<{ recon: Float32Array, currentAngle: number, currentProjection: Float32Array, step: number }> {
   const recon = new Float32Array(outputSize * outputSize);
   const cx = outputSize / 2,
     cy = outputSize / 2;
@@ -102,13 +100,15 @@ export function* backProjectionGenerator(
     }
   }
 
-  const factor = Math.PI / numAngles;
+  const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
+  const factor = angleRangeRad / numAngles;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = (ai * Math.PI) / numAngles;
-    const mathTheta = theta + Math.PI / 2;
-    const cosT = Math.cos(mathTheta);
-    const sinT = Math.sin(mathTheta);
+    const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
+      ? (projectionAnglesDeg[ai] * Math.PI) / 180
+      : (ai * angleRangeRad) / numAngles;
+    const cosT = Math.cos(theta);
+    const sinT = Math.sin(theta);
 
     const currentProjection = processingSinogram.slice(
       ai * numDetectors,
@@ -143,7 +143,9 @@ export function* backProjectionGenerator(
 
   return {
     recon: new Float32Array(recon),
-    currentAngle: 180,
+    currentAngle: projectionAnglesDeg && projectionAnglesDeg.length > 0
+      ? projectionAnglesDeg[projectionAnglesDeg.length - 1]
+      : angleRangeDeg,
     currentProjection: new Float32Array(),
     step: numAngles,
   };

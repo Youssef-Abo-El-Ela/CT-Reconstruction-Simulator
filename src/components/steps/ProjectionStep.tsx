@@ -18,28 +18,13 @@ import { Scan } from "lucide-react";
 
 export function ProjectionStep() {
   const {
-    phantomData,
-    phantomSize,
-    numAngles,
-    setNumAngles,
-    numDetectors,
-    setNumDetectors,
-    noiseEnabled,
-    setNoiseEnabled,
-    noiseSNR,
-    setNoiseSNR,
-    sinogramData,
-    setSinogramData,
-    setStepStatus,
-    scanProgress,
-    setScanProgress,
-    setCurrentAngle,
-    currentAngle,
-    liveSinogramData,
-    setLiveSinogramData,
-    currentProjection,
-    setCurrentProjection,
-    animationSpeed,
+    phantomData, phantomSize, numAngles, setNumAngles, scanAngleRangeDeg, setScanAngleRangeDeg,
+    numDetectors, setNumDetectors, noiseEnabled, setNoiseEnabled,
+    noiseSNR, setNoiseSNR, sinogramData, setSinogramData, setStepStatus,
+    scanProgress, setScanProgress, setCurrentAngle, currentAngle,
+    liveSinogramData, setLiveSinogramData, currentProjection, setCurrentProjection,
+    setProjectionAnglesDeg,
+    animationSpeed
   } = useCTStore();
 
   const [isScanning, setIsScanning] = useState(false);
@@ -49,9 +34,13 @@ export function ProjectionStep() {
     if (!phantomData) return;
     setIsScanning(true);
     cancelRef.current = false;
-    setStepStatus(1, "running");
+    setStepStatus(1, 'running');
+    const angleRangeRad = (scanAngleRangeDeg * Math.PI) / 180;
+    const angleRangeDeg = scanAngleRangeDeg;
+    const nonUniformPower = 1.35;
 
     const sinogram = new Float32Array(numAngles * numDetectors);
+    const projectionAngles = new Float32Array(numAngles);
     setLiveSinogramData(sinogram);
 
     const delay =
@@ -61,14 +50,12 @@ export function ProjectionStep() {
       if (cancelRef.current) break;
 
       if (ai < numAngles) {
-        const theta = (ai * Math.PI) / numAngles;
-        const projection = radonTransformSingleAngle(
-          phantomData,
-          phantomSize,
-          numDetectors,
-          theta,
-        );
-
+        const t = numAngles > 1 ? ai / (numAngles - 1) : 0;
+        const nonUniformT = Math.pow(t, nonUniformPower);
+        const theta = nonUniformT * angleRangeRad;
+        projectionAngles[ai] = nonUniformT * angleRangeDeg;
+        const projection = radonTransformSingleAngle(phantomData, phantomSize, numDetectors, theta);
+        
         if (noiseEnabled) {
           addGaussianNoise(projection, noiseSNR);
         }
@@ -79,8 +66,12 @@ export function ProjectionStep() {
 
         setLiveSinogramData(new Float32Array(sinogram));
         setCurrentProjection(projection);
+        setCurrentAngle(projectionAngles[ai]);
+      } else {
+        setCurrentAngle(scanAngleRangeDeg);
       }
-
+      
+      
       setScanProgress((ai / numAngles) * 100);
       setCurrentAngle((ai / numAngles) * 180);
 
@@ -89,26 +80,15 @@ export function ProjectionStep() {
 
     if (!cancelRef.current) {
       setSinogramData(sinogram);
-      setStepStatus(1, "done");
-      setStepStatus(2, "ready");
+      setProjectionAnglesDeg(projectionAngles);
+      setStepStatus(1, 'done');
+      setStepStatus(2, 'ready');
     }
 
     setIsScanning(false);
-  }, [
-    phantomData,
-    phantomSize,
-    numAngles,
-    numDetectors,
-    noiseEnabled,
-    noiseSNR,
-    setSinogramData,
-    setStepStatus,
-    setScanProgress,
-    setCurrentAngle,
-    setLiveSinogramData,
-    setCurrentProjection,
-    animationSpeed,
-  ]);
+  }, [phantomData, phantomSize, numAngles, numDetectors, noiseEnabled, noiseSNR, scanAngleRangeDeg,
+      setSinogramData, setStepStatus, setScanProgress, setCurrentAngle,
+      setLiveSinogramData, setCurrentProjection, setProjectionAnglesDeg, animationSpeed]);
 
   const cancel = useCallback(() => {
     cancelRef.current = true;
@@ -145,11 +125,15 @@ export function ProjectionStep() {
                 </div>
                 <Slider
                   value={[numAngles]}
-                  onValueChange={([v]) => setNumAngles(v)}
-                  min={1}
-                  max={360}
-                  step={1}
+                  onValueChange={([v]) => {
+                    setNumAngles(v);
+                    setScanAngleRangeDeg(v);
+                  }}
+                  min={1} max={360} step={1}
                 />
+                <div className="text-[11px] text-muted-foreground mt-1">
+                  Angle range: 0° to {scanAngleRangeDeg}°
+                </div>
               </div>
 
               <div>

@@ -24,7 +24,7 @@ import { sartReconstruction } from '@/lib/sart';
 
 export function ReconstructionStep() {
   const {
-    sinogramData, numAngles, numDetectors, phantomSize,
+    sinogramData, projectionAnglesDeg, numAngles, numDetectors, phantomSize, scanAngleRangeDeg,
     filterType, setFilterType, artIterations, setArtIterations,
     artLambda, setArtLambda, sartIterations, setSartIterations,
     sartLambda, setSartLambda, setReconstruction, reconstructions,
@@ -44,8 +44,8 @@ export function ReconstructionStep() {
     await new Promise(r => setTimeout(r, 50));
     const start = performance.now();
     const data = method === 'bp'
-      ? simpleBackProjection(sinogramData, numAngles, numDetectors, phantomSize)
-      : filteredBackProjection(sinogramData, numAngles, numDetectors, phantomSize, filterType);
+      ? simpleBackProjection(sinogramData, numAngles, numDetectors, phantomSize, scanAngleRangeDeg, projectionAnglesDeg)
+      : filteredBackProjection(sinogramData, numAngles, numDetectors, phantomSize, filterType, scanAngleRangeDeg, projectionAnglesDeg);
     const timeMs = performance.now() - start;
     setReconstruction(method, { data, size: phantomSize, timeMs, method });
     setStepStatus(3, 'done');
@@ -54,7 +54,7 @@ export function ReconstructionStep() {
     // Play animation separately (visual only)
     if (method === 'bp') bpViewerRef.current?.play();
     else fbpViewerRef.current?.play();
-  }, [sinogramData, numAngles, numDetectors, phantomSize, filterType,
+  }, [sinogramData, projectionAnglesDeg, numAngles, numDetectors, phantomSize, filterType, scanAngleRangeDeg,
       setReconstruction, setStepStatus]);
 
   const runReconstruction = useCallback(async (method: ReconMethod) => {
@@ -68,16 +68,16 @@ export function ReconstructionStep() {
 
     switch (method) {
       case 'bp':
-        data = simpleBackProjection(sinogramData, numAngles, numDetectors, phantomSize);
+        data = simpleBackProjection(sinogramData, numAngles, numDetectors, phantomSize, scanAngleRangeDeg, projectionAnglesDeg);
         break;
       case 'fbp':
-        data = filteredBackProjection(sinogramData, numAngles, numDetectors, phantomSize, filterType);
+        data = filteredBackProjection(sinogramData, numAngles, numDetectors, phantomSize, filterType, scanAngleRangeDeg, projectionAnglesDeg);
         break;
       case 'fourier':
-        data = fourierReconstruction(sinogramData, numAngles, numDetectors, phantomSize);
+        data = fourierReconstruction(sinogramData, numAngles, numDetectors, phantomSize, scanAngleRangeDeg, projectionAnglesDeg);
         break;
       case 'art':
-        data = artReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda);
+        data = artReconstruction(sinogramData, numAngles, numDetectors, phantomSize, artIterations, artLambda, scanAngleRangeDeg, projectionAnglesDeg);
         break;
       case 'sart':
         data = sartReconstruction(sinogramData, numAngles, numDetectors, phantomSize, sartIterations, sartLambda);
@@ -92,7 +92,7 @@ export function ReconstructionStep() {
     setIsRunning(prev => ({ ...prev, [method]: false }));
     setStepStatus(3, 'done');
     setStepStatus(4, 'ready');
-  }, [sinogramData, numAngles, numDetectors, phantomSize, filterType, artIterations, artLambda, sartIterations, sartLambda,
+  }, [sinogramData, projectionAnglesDeg, numAngles, numDetectors, phantomSize, filterType, artIterations, artLambda, scanAngleRangeDeg,
       setReconstruction, setStepStatus]);
 
   const resetMethod = useCallback((method: string) => {
@@ -174,6 +174,8 @@ export function ReconstructionStep() {
               numAngles={numAngles}
               numDetectors={numDetectors}
               phantomSize={phantomSize}
+              angleRangeDeg={scanAngleRangeDeg}
+              projectionAnglesDeg={projectionAnglesDeg}
               label="Back Projection"
               borderColor={algoStyles.bp.border}
               forceData={reconstructions.bp?.data ?? null}
@@ -227,6 +229,8 @@ export function ReconstructionStep() {
               numAngles={numAngles}
               numDetectors={numDetectors}
               phantomSize={phantomSize}
+              angleRangeDeg={scanAngleRangeDeg}
+              projectionAnglesDeg={projectionAnglesDeg}
               filterType={filterType}
               label="Filtered Back Projection"
               borderColor={algoStyles.fbp.border}
