@@ -59,7 +59,7 @@ export function AnimatedProjectionViewer({
     ctx.save();
     
     ctx.translate(cx, cy);
-    ctx.rotate((currentAngleDeg - 90) * Math.PI / 180);
+    ctx.rotate((currentAngleDeg) * Math.PI / 180);
     ctx.translate(-cx, -cy);
 
     const sourceY = padding / 2;
