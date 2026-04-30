@@ -28,7 +28,7 @@ export function sartReconstruction(
       const cosT = Math.cos(mathTheta);
       const sinT = Math.sin(mathTheta);
 
-      // --- SART MODIFICATION 1: Create accumulation buffers for the current angle ---
+      // Create accumulation buffers for the current angle
       const correctionBuffer = new Float32Array(outputSize * outputSize);
       const weightBuffer = new Float32Array(outputSize * outputSize);
 
@@ -57,7 +57,7 @@ export function sartReconstruction(
           // Calculate the raw correction for this specific ray
           const rayCorrection = (measured - projected) / rayLen;
 
-          // --- SART MODIFICATION 2: Accumulate corrections, DO NOT update recon yet ---
+          // Accumulate corrections, DO NOT update recon yet
           for (const { idx, weight } of rayPixels) {
             correctionBuffer[idx] += rayCorrection;
             weightBuffer[idx] += weight * weight; // Track how many rays hit this pixel
@@ -65,7 +65,7 @@ export function sartReconstruction(
         }
       }
 
-      // --- SART MODIFICATION 3: Apply simultaneous update after all rays in the angle are processed ---
+      // Apply simultaneous update after all rays in the angle are processed
       for (let i = 0; i < recon.length; i++) {
         // Only update pixels that were actually hit by rays in this angle
         if (weightBuffer[i] > 0) {

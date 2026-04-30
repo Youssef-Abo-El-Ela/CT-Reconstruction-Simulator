@@ -157,22 +157,30 @@ export function ProjectionStep() {
             <div className="glass-panel p-4 space-y-4">
               <div>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">Angles</span>
+                  <span className="text-muted-foreground">Number of Angles</span>
                   <span className="font-mono text-primary">{numAngles}</span>
                 </div>
                 <Slider
                   value={[numAngles]}
-                  onValueChange={([v]) => {
-                    setNumAngles(v);
-                    setScanAngleRangeDeg(v);
-                  }}
+                  onValueChange={([v]) => setNumAngles(v)}
+                  min={1}
+                  max={720}
+                  step={1}
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-muted-foreground">Angle Range</span>
+                  <span className="font-mono text-primary">{scanAngleRangeDeg}°</span>
+                </div>
+                <Slider
+                  value={[scanAngleRangeDeg]}
+                  onValueChange={([v]) => setScanAngleRangeDeg(v)}
                   min={1}
                   max={360}
                   step={1}
                 />
-                <div className="text-[11px] text-muted-foreground mt-1">
-                  Angle range: 0° to {scanAngleRangeDeg}°
-                </div>
               </div>
 
               <div>
