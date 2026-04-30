@@ -1,5 +1,6 @@
 import type { FilterType } from "@/types";
 import { createFilter, applyFilter1D } from "./filters";
+import { getProjectionThetaRad, toProjectorMathTheta } from "./angles";
 
 export function simpleBackProjection(
   sinogram: Float32Array,
@@ -7,7 +8,7 @@ export function simpleBackProjection(
   numDetectors: number,
   outputSize: number,
   angleRangeDeg: number = 180,
-  projectionAnglesDeg?: Float32Array | null
+  projectionAnglesDeg?: Float32Array | null,
 ): Float32Array {
   const recon = new Float32Array(outputSize * outputSize);
   const cx = outputSize / 2,
@@ -17,11 +18,16 @@ export function simpleBackProjection(
   const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
-      ? (projectionAnglesDeg[ai] * Math.PI) / 180
-      : (ai * angleRangeRad) / numAngles;
-    const cosT = Math.cos(theta);
-    const sinT = Math.sin(theta);
+    const theta = getProjectionThetaRad(
+      ai,
+      numAngles,
+      angleRangeDeg,
+      
+      projectionAnglesDeg,
+    );
+    const mathTheta = toProjectorMathTheta(theta);
+    const cosT = Math.cos(mathTheta);
+    const sinT = Math.sin(mathTheta);
 
     for (let j = 0; j < outputSize; j++) {
       for (let i = 0; i < outputSize; i++) {
@@ -52,9 +58,9 @@ export function filteredBackProjection(
   numAngles: number,
   numDetectors: number,
   outputSize: number,
-  filterType: FilterType = 'ram-lak',
+  filterType: FilterType = "ram-lak",
   angleRangeDeg: number = 180,
-  projectionAnglesDeg?: Float32Array | null
+  projectionAnglesDeg?: Float32Array | null,
 ): Float32Array {
   const filter = createFilter(numDetectors, filterType);
   const filteredSinogram = new Float32Array(sinogram.length);
@@ -68,7 +74,14 @@ export function filteredBackProjection(
     filteredSinogram.set(filtered, ai * numDetectors);
   }
 
-  return simpleBackProjection(filteredSinogram, numAngles, numDetectors, outputSize, angleRangeDeg, projectionAnglesDeg);
+  return simpleBackProjection(
+    filteredSinogram,
+    numAngles,
+    numDetectors,
+    outputSize,
+    angleRangeDeg,
+    projectionAnglesDeg,
+  );
 }
 
 export function* backProjectionGenerator(
@@ -78,8 +91,13 @@ export function* backProjectionGenerator(
   outputSize: number,
   filterType?: FilterType,
   angleRangeDeg: number = 180,
-  projectionAnglesDeg?: Float32Array | null
-): Generator<{ recon: Float32Array, currentAngle: number, currentProjection: Float32Array, step: number }> {
+  projectionAnglesDeg?: Float32Array | null,
+): Generator<{
+  recon: Float32Array;
+  currentAngle: number;
+  currentProjection: Float32Array;
+  step: number;
+}> {
   const recon = new Float32Array(outputSize * outputSize);
   const cx = outputSize / 2,
     cy = outputSize / 2;
@@ -104,11 +122,15 @@ export function* backProjectionGenerator(
   const factor = angleRangeRad / numAngles;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
-      ? (projectionAnglesDeg[ai] * Math.PI) / 180
-      : (ai * angleRangeRad) / numAngles;
-    const cosT = Math.cos(theta);
-    const sinT = Math.sin(theta);
+    const theta = getProjectionThetaRad(
+      ai,
+      numAngles,
+      angleRangeDeg,
+      projectionAnglesDeg,
+    );
+    const mathTheta = toProjectorMathTheta(theta);
+    const cosT = Math.cos(mathTheta);
+    const sinT = Math.sin(mathTheta);
 
     const currentProjection = processingSinogram.slice(
       ai * numDetectors,
@@ -143,9 +165,10 @@ export function* backProjectionGenerator(
 
   return {
     recon: new Float32Array(recon),
-    currentAngle: projectionAnglesDeg && projectionAnglesDeg.length > 0
-      ? projectionAnglesDeg[projectionAnglesDeg.length - 1]
-      : angleRangeDeg,
+    currentAngle:
+      projectionAnglesDeg && projectionAnglesDeg.length > 0
+        ? projectionAnglesDeg[projectionAnglesDeg.length - 1]
+        : angleRangeDeg,
     currentProjection: new Float32Array(),
     step: numAngles,
   };

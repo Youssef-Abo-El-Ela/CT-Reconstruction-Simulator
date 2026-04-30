@@ -1,28 +1,32 @@
+import { getProjectionThetaRad, toProjectorMathTheta } from "./angles";
+
 export function sartReconstruction(
-    sinogram: Float32Array,
-    numAngles: number,
-    numDetectors: number,
-    outputSize: number,
-    iterations: number = 40,
-    lambda: number = 0.5,
-    angleRangeDeg: number = 180,
-    projectionAnglesDeg?: Float32Array | null
+  sinogram: Float32Array,
+  numAngles: number,
+  numDetectors: number,
+  outputSize: number,
+  iterations: number = 40,
+  lambda: number = 0.5,
+  angleRangeDeg: number = 180,
+  projectionAnglesDeg?: Float32Array | null,
 ): Float32Array {
-    const recon = new Float32Array(outputSize * outputSize);
-    const cx = outputSize / 2, cy = outputSize / 2;
-    const detHalf = numDetectors / 2;
-    const scale = numDetectors / outputSize;
-    const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
+  const recon = new Float32Array(outputSize * outputSize);
+  const cx = outputSize / 2,
+    cy = outputSize / 2;
+  const detHalf = numDetectors / 2;
+  const scale = numDetectors / outputSize;
 
-
-    for (let iter = 0; iter < iterations; iter++) {
-        for (let ai = 0; ai < numAngles; ai++) {
-          const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
-                ? (projectionAnglesDeg[ai] * Math.PI) / 180
-                : (ai * angleRangeRad) / numAngles;
-          const mathTheta = theta + Math.PI / 2;
-            const cosT = Math.cos(mathTheta);
-            const sinT = Math.sin(mathTheta);
+  for (let iter = 0; iter < iterations; iter++) {
+    for (let ai = 0; ai < numAngles; ai++) {
+      const theta = getProjectionThetaRad(
+        ai,
+        numAngles,
+        angleRangeDeg,
+        projectionAnglesDeg,
+      );
+      const mathTheta = toProjectorMathTheta(theta);
+      const cosT = Math.cos(mathTheta);
+      const sinT = Math.sin(mathTheta);
 
       // --- SART MODIFICATION 1: Create accumulation buffers for the current angle ---
       const correctionBuffer = new Float32Array(outputSize * outputSize);

@@ -1,5 +1,12 @@
-import { create } from 'zustand';
-import type { StepStatus, PhantomType, ColormapName, AnimationSpeed, ReconResult, FilterType } from '@/types';
+import { create } from "zustand";
+import type {
+  StepStatus,
+  PhantomType,
+  ColormapName,
+  AnimationSpeed,
+  ReconResult,
+  FilterType,
+} from "@/types";
 
 interface CTStore {
   activeStep: number;
@@ -19,6 +26,8 @@ interface CTStore {
   setScanAngleRangeDeg: (deg: number) => void;
   numDetectors: number;
   setNumDetectors: (n: number) => void;
+  useNonUniformAngularSampling: boolean;
+  setUseNonUniformAngularSampling: (v: boolean) => void;
   noiseEnabled: boolean;
   setNoiseEnabled: (v: boolean) => void;
   noiseSNR: number;
@@ -63,13 +72,20 @@ interface CTStore {
 
 const initialState = {
   activeStep: 0,
-  stepStatus: { 0: 'ready' as StepStatus, 1: 'locked' as StepStatus, 2: 'locked' as StepStatus, 3: 'locked' as StepStatus, 4: 'locked' as StepStatus },
-  phantomType: 'shepp-logan' as PhantomType,
+  stepStatus: {
+    0: "ready" as StepStatus,
+    1: "locked" as StepStatus,
+    2: "locked" as StepStatus,
+    3: "locked" as StepStatus,
+    4: "locked" as StepStatus,
+  },
+  phantomType: "shepp-logan" as PhantomType,
   phantomData: null as Float32Array | null,
   phantomSize: 256,
   numAngles: 180,
   scanAngleRangeDeg: 180,
   numDetectors: 256,
+  useNonUniformAngularSampling: false,
   noiseEnabled: false,
   noiseSNR: 40,
   sinogramData: null as Float32Array | null,
@@ -79,13 +95,13 @@ const initialState = {
   scanProgress: 0,
   currentAngle: 0,
   reconstructions: {} as Record<string, ReconResult>,
-  filterType: 'ram-lak' as FilterType,
+  filterType: "ram-lak" as FilterType,
   artIterations: 10,
   artLambda: 0.5,
   sartIterations: 40,
   sartLambda: 0.5,
-  animationSpeed: 'fast' as AnimationSpeed,
-  colormap: 'grayscale' as ColormapName,
+  animationSpeed: "fast" as AnimationSpeed,
+  colormap: "grayscale" as ColormapName,
 };
 
 export const useCTStore = create<CTStore>((set) => ({
@@ -99,6 +115,8 @@ export const useCTStore = create<CTStore>((set) => ({
   setNumAngles: (n) => set({ numAngles: n }),
   setScanAngleRangeDeg: (deg) => set({ scanAngleRangeDeg: deg }),
   setNumDetectors: (n) => set({ numDetectors: n }),
+  setUseNonUniformAngularSampling: (v) =>
+    set({ useNonUniformAngularSampling: v }),
   setNoiseEnabled: (v) => set({ noiseEnabled: v }),
   setNoiseSNR: (v) => set({ noiseSNR: v }),
   setSinogramData: (data) => set({ sinogramData: data }),
@@ -108,7 +126,9 @@ export const useCTStore = create<CTStore>((set) => ({
   setScanProgress: (p) => set({ scanProgress: p }),
   setCurrentAngle: (a) => set({ currentAngle: a }),
   setReconstruction: (method, result) =>
-    set((s) => ({ reconstructions: { ...s.reconstructions, [method]: result } })),
+    set((s) => ({
+      reconstructions: { ...s.reconstructions, [method]: result },
+    })),
   clearReconstructions: () => set({ reconstructions: {} }),
   setFilterType: (f) => set({ filterType: f }),
   setArtIterations: (n) => set({ artIterations: n }),

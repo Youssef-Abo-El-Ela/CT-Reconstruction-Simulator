@@ -1,3 +1,5 @@
+import { getProjectionThetaRad, toProjectorMathTheta } from "./angles";
+
 export function fft1d(
   real: Float32Array,
   imag: Float32Array,
@@ -102,7 +104,7 @@ export function fourierReconstruction(
   numDetectors: number,
   outputSize: number,
   angleRangeDeg: number = 180,
-  projectionAnglesDeg?: Float32Array | null
+  projectionAnglesDeg?: Float32Array | null,
 ): Float32Array {
   const fftSize = nextPow2(Math.max(numDetectors, outputSize));
   const freqReal = new Float32Array(fftSize * fftSize);
@@ -110,13 +112,17 @@ export function fourierReconstruction(
   const weight = new Float32Array(fftSize * fftSize);
 
   const center = fftSize / 2;
-  const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
 
   for (let ai = 0; ai < numAngles; ai++) {
-    const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
-      ? (projectionAnglesDeg[ai] * Math.PI) / 180
-      : (ai * angleRangeRad) / numAngles;
-    const cosT = Math.cos(theta), sinT = Math.sin(theta);
+    const theta = getProjectionThetaRad(
+      ai,
+      numAngles,
+      angleRangeDeg,
+      projectionAnglesDeg,
+    );
+    const mathTheta = toProjectorMathTheta(theta);
+    const cosT = Math.cos(mathTheta),
+      sinT = Math.sin(mathTheta);
 
     const projR = new Float32Array(fftSize);
     const projI = new Float32Array(fftSize);

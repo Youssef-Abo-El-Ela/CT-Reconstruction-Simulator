@@ -1,3 +1,5 @@
+import { getProjectionThetaRad, toProjectorMathTheta } from "./angles";
+
 export function artReconstruction(
   sinogram: Float32Array,
   numAngles: number,
@@ -6,22 +8,25 @@ export function artReconstruction(
   iterations: number = 10,
   lambda: number = 0.5,
   angleRangeDeg: number = 180,
-  projectionAnglesDeg?: Float32Array | null
+  projectionAnglesDeg?: Float32Array | null,
 ): Float32Array {
   const recon = new Float32Array(outputSize * outputSize);
   const cx = outputSize / 2,
     cy = outputSize / 2;
   const detHalf = numDetectors / 2;
   const scale = numDetectors / outputSize;
-  const angleRangeRad = (angleRangeDeg * Math.PI) / 180;
 
   for (let iter = 0; iter < iterations; iter++) {
     for (let ai = 0; ai < numAngles; ai++) {
-      const theta = projectionAnglesDeg && ai < projectionAnglesDeg.length
-        ? (projectionAnglesDeg[ai] * Math.PI) / 180
-        : (ai * angleRangeRad) / numAngles;
-      const cosT = Math.cos(theta);
-      const sinT = Math.sin(theta);
+      const theta = getProjectionThetaRad(
+        ai,
+        numAngles,
+        angleRangeDeg,
+        projectionAnglesDeg,
+      );
+      const mathTheta = toProjectorMathTheta(theta);
+      const cosT = Math.cos(mathTheta);
+      const sinT = Math.sin(mathTheta);
 
       for (let di = 0; di < numDetectors; di++) {
         const measured = sinogram[ai * numDetectors + di];

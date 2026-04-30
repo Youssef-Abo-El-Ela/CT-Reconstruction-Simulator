@@ -12,19 +12,40 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { radonTransformSingleAngle, addGaussianNoise } from "@/lib/radon";
+import { buildProjectionAnglesDeg, degToRad } from "@/lib/angles";
 import { Play, Square, Info, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { Scan } from "lucide-react";
 
 export function ProjectionStep() {
   const {
-    phantomData, phantomSize, numAngles, setNumAngles, scanAngleRangeDeg, setScanAngleRangeDeg,
-    numDetectors, setNumDetectors, noiseEnabled, setNoiseEnabled,
-    noiseSNR, setNoiseSNR, sinogramData, setSinogramData, setStepStatus,
-    scanProgress, setScanProgress, setCurrentAngle, currentAngle,
-    liveSinogramData, setLiveSinogramData, currentProjection, setCurrentProjection,
+    phantomData,
+    phantomSize,
+    numAngles,
+    setNumAngles,
+    scanAngleRangeDeg,
+    setScanAngleRangeDeg,
+    numDetectors,
+    setNumDetectors,
+    useNonUniformAngularSampling,
+    setUseNonUniformAngularSampling,
+    noiseEnabled,
+    setNoiseEnabled,
+    noiseSNR,
+    setNoiseSNR,
+    sinogramData,
+    setSinogramData,
+    setStepStatus,
+    scanProgress,
+    setScanProgress,
+    setCurrentAngle,
+    currentAngle,
+    liveSinogramData,
+    setLiveSinogramData,
+    currentProjection,
+    setCurrentProjection,
     setProjectionAnglesDeg,
-    animationSpeed
+    animationSpeed,
   } = useCTStore();
 
   const [isScanning, setIsScanning] = useState(false);
@@ -34,13 +55,14 @@ export function ProjectionStep() {
     if (!phantomData) return;
     setIsScanning(true);
     cancelRef.current = false;
-    setStepStatus(1, 'running');
-    const angleRangeRad = (scanAngleRangeDeg * Math.PI) / 180;
-    const angleRangeDeg = scanAngleRangeDeg;
-    const nonUniformPower = 1.35;
+    setStepStatus(1, "running");
 
     const sinogram = new Float32Array(numAngles * numDetectors);
-    const projectionAngles = new Float32Array(numAngles);
+    const projectionAngles = buildProjectionAnglesDeg(
+      numAngles,
+      scanAngleRangeDeg,
+      useNonUniformAngularSampling,
+    );
     setLiveSinogramData(sinogram);
 
     const delay =
@@ -50,12 +72,14 @@ export function ProjectionStep() {
       if (cancelRef.current) break;
 
       if (ai < numAngles) {
-        const t = numAngles > 1 ? ai / (numAngles - 1) : 0;
-        const nonUniformT = Math.pow(t, nonUniformPower);
-        const theta = nonUniformT * angleRangeRad;
-        projectionAngles[ai] = nonUniformT * angleRangeDeg;
-        const projection = radonTransformSingleAngle(phantomData, phantomSize, numDetectors, theta);
-        
+        const theta = degToRad(projectionAngles[ai]);
+        const projection = radonTransformSingleAngle(
+          phantomData,
+          phantomSize,
+          numDetectors,
+          theta,
+        );
+
         if (noiseEnabled) {
           addGaussianNoise(projection, noiseSNR);
         }
@@ -70,10 +94,8 @@ export function ProjectionStep() {
       } else {
         setCurrentAngle(scanAngleRangeDeg);
       }
-      
-      
+
       setScanProgress((ai / numAngles) * 100);
-      setCurrentAngle((ai / numAngles) * 180);
 
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -81,14 +103,29 @@ export function ProjectionStep() {
     if (!cancelRef.current) {
       setSinogramData(sinogram);
       setProjectionAnglesDeg(projectionAngles);
-      setStepStatus(1, 'done');
-      setStepStatus(2, 'ready');
+      setStepStatus(1, "done");
+      setStepStatus(2, "ready");
     }
 
     setIsScanning(false);
-  }, [phantomData, phantomSize, numAngles, numDetectors, noiseEnabled, noiseSNR, scanAngleRangeDeg,
-      setSinogramData, setStepStatus, setScanProgress, setCurrentAngle,
-      setLiveSinogramData, setCurrentProjection, setProjectionAnglesDeg, animationSpeed]);
+  }, [
+    phantomData,
+    phantomSize,
+    numAngles,
+    numDetectors,
+    useNonUniformAngularSampling,
+    noiseEnabled,
+    noiseSNR,
+    scanAngleRangeDeg,
+    setSinogramData,
+    setStepStatus,
+    setScanProgress,
+    setCurrentAngle,
+    setLiveSinogramData,
+    setCurrentProjection,
+    setProjectionAnglesDeg,
+    animationSpeed,
+  ]);
 
   const cancel = useCallback(() => {
     cancelRef.current = true;
@@ -129,7 +166,9 @@ export function ProjectionStep() {
                     setNumAngles(v);
                     setScanAngleRangeDeg(v);
                   }}
-                  min={1} max={360} step={1}
+                  min={1}
+                  max={360}
+                  step={1}
                 />
                 <div className="text-[11px] text-muted-foreground mt-1">
                   Angle range: 0° to {scanAngleRangeDeg}°
@@ -147,6 +186,16 @@ export function ProjectionStep() {
                   min={64}
                   max={512}
                   step={1}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  Non-Uniform Angular Sampling
+                </span>
+                <Switch
+                  checked={useNonUniformAngularSampling}
+                  onCheckedChange={setUseNonUniformAngularSampling}
                 />
               </div>
 
