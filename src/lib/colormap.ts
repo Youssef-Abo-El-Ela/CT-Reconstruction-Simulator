@@ -89,8 +89,8 @@ export function applyColormap(
   const range = max - min || 1;
 
   for (let y = 0; y < height; y++) {
-    const sourceY = flipVertical ? height - 1 - y : y;
     for (let x = 0; x < width; x++) {
+      const sourceY = flipVertical ? height - 1 - y : y;
       const sourceIndex = sourceY * width + x;
       const targetIndex = y * width + x;
       const val = Math.max(

@@ -4,18 +4,20 @@ export function artReconstruction(
   numDetectors: number,
   outputSize: number,
   iterations: number = 10,
-  lambda: number = 0.5
+  lambda: number = 0.5,
 ): Float32Array {
   const recon = new Float32Array(outputSize * outputSize);
-  const cx = outputSize / 2, cy = outputSize / 2;
+  const cx = outputSize / 2,
+    cy = outputSize / 2;
   const detHalf = numDetectors / 2;
   const scale = numDetectors / outputSize;
 
   for (let iter = 0; iter < iterations; iter++) {
     for (let ai = 0; ai < numAngles; ai++) {
       const theta = (ai * Math.PI) / numAngles;
-      const cosT = Math.cos(theta);
-      const sinT = Math.sin(theta);
+      const mathTheta = theta + Math.PI / 2;
+      const cosT = Math.cos(mathTheta);
+      const sinT = Math.sin(mathTheta);
 
       for (let di = 0; di < numDetectors; di++) {
         const measured = sinogram[ai * numDetectors + di];
@@ -28,7 +30,8 @@ export function artReconstruction(
         for (let t = -cx; t < cx; t += 1) {
           const x = s * cosT - t * sinT + cx;
           const y = s * sinT + t * cosT + cy;
-          const xi = Math.floor(x), yi = Math.floor(y);
+          const xi = Math.floor(x),
+            yi = Math.floor(y);
           if (xi >= 0 && xi < outputSize && yi >= 0 && yi < outputSize) {
             const idx = yi * outputSize + xi;
             rayPixels.push({ idx, weight: 1 });
@@ -38,7 +41,7 @@ export function artReconstruction(
         }
 
         if (rayLen > 0) {
-          const correction = lambda * (measured - projected) / rayLen;
+          const correction = (lambda * (measured - projected)) / rayLen;
           for (const { idx } of rayPixels) {
             recon[idx] += correction;
           }
