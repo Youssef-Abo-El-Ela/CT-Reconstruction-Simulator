@@ -20,7 +20,7 @@ Define the object to be "scanned" before any simulation begins.
 - **Shepp-Logan Phantom** — The standard benchmark image used to test CT algorithms, composed of 10 overlapping ellipses simulating human tissue densities.
 - **Geometric Phantom** — A simple geometric shape for quick, illustrative tests.
 - **Resolution Phantom** — A phantom designed to evaluate spatial resolution limits.
-- **Custom Draw Mode** — Draw your own phantom freehand on a 256×256 canvas with adjustable brush size, eraser, undo history (up to 20 steps), and canvas clear.
+- **Custom Draw Mode** — Draw your own phantom freehand.
 
 ---
 
@@ -65,22 +65,6 @@ Compare all executed reconstructions side by side with quantitative metrics.
   - **PSNR** — Peak Signal-to-Noise Ratio (dB)
   - **SSIM** — Structural Similarity Index
   - **Time** — Execution time in milliseconds
-- **Interactive bar chart** (Recharts) comparing PSNR, SSIM, and SNR across all algorithms with animated bars and a custom glassmorphic tooltip.
-- **Metrics summary table** listing Time, RMSE, PSNR, SSIM, and SNR for every algorithm in one place.
-
----
-
-### 🎨 Colormaps
-All image canvases support switchable colormaps for visual analysis:
-
-| Colormap | Description |
-|----------|-------------|
-| **Grayscale** | Standard black-to-white intensity mapping |
-| **Hot** | Black → Red → Yellow → White thermal scale |
-| **Viridis** | Perceptually uniform blue-green-yellow scale |
-| **Jet** | Classic blue-cyan-yellow-red rainbow scale |
-| **Plasma** | Perceptually uniform purple-orange-yellow scale |
-
 ---
 
 ## Tech Stack
